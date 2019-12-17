@@ -1,4 +1,12 @@
 const base_url = "https://api.football-data.org/v2/";
+const api_key = '6df32f3d034442d38a32a504f4692faf';
+const fetchApi = function(url) {    
+  return fetch(url, {
+    headers: {
+      'X-Auth-Token': api_key
+    }
+  });
+};
 // Blok kode yang akan di panggil jika fetch berhasil
 function status(response) {
   if (response.status !== 200) {
@@ -38,13 +46,15 @@ function setFavorite(favorite, id, name, image) {
 				name: name,
 				image: image
 			};
-			store.put(item, id); 
+      store.put(item, id); 
+      M.toast({html: 'Club '+name+' telah disukai'});
 			return tx.complete;
 		} else {
 			dbPromise.then(function(db) {
 			  var tx = db.transaction('klub', 'readwrite');
 			  var store = tx.objectStore('klub');
-			  store.delete(id);
+        store.delete(id);
+        M.toast({html: 'Club '+name+' batal disukai'});
 			  return tx.complete;
 			}).then(function() {
         console.log('Klub Favorite dihapus');
@@ -86,12 +96,8 @@ function getClub() {
       }
     });
   }
-
-  fetch(base_url + "competitions/2021/standings",  {
-    headers: {
-      'X-Auth-Token': '6df32f3d034442d38a32a504f4692faf'
-    }
-  }).then(status).then(json).then(function(data) {
+  
+  fetchApi(base_url + "competitions/2021/standings").then(status).then(json).then(function(data) {
       // Objek/array JavaScript dari response.json() masuk lewat data.
       // Menyusun komponen card artikel secara dinamis
       var clubHTML = "";
@@ -182,11 +188,7 @@ function getArticleById() {
     })
   }
 
-  fetch(base_url + "teams/" + idParam,  {
-    headers: {
-      'X-Auth-Token': '6df32f3d034442d38a32a504f4692faf'
-    }
-  }).then(status).then(json).then(function(data) {
+  fetchApi(base_url + "teams/" + idParam).then(status).then(json).then(function(data) {
     console.log("masuk fetch");
     
 
@@ -228,7 +230,7 @@ function getClubCard(id, imageSrc, name, played, won, lost) {
   <div class="col s12 m12 l6">
     <div class="card horizontal">
       <div class="card-image">
-        <img height="200px" src="${imageSrc}">
+        <img class="img-resize" src="${imageSrc}">
       </div>
       <div class="card-stacked">
         <div class="card-content">
